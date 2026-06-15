@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexBoard — 2025나210335</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;background:#f4f6fb;color:#1a1d2e;min-height:100vh;font-size:14px}
+
+/* ── 네비 ── */
+.nav{background:#fff;border-bottom:1px solid #e8eaf0;padding:0 24px;display:flex;align-items:center;height:54px;position:sticky;top:0;z-index:300;gap:14px}
+.logo{font-size:17px;font-weight:800;color:#4361ee;letter-spacing:-.5px}.logo span{color:#f72585}
+.nav-case{font-size:11px;color:#8890b0;border-left:1px solid #e8eaf0;padding-left:14px;line-height:1.4}
+.nav-case strong{color:#1a1d2e;display:block;font-size:12px}
+.nav-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+.pill-live{background:#e8fff2;color:#00a854;border:1px solid #b7ebd5}
+.pill-date{background:#f0f2f8;color:#8890b0;border:1px solid #dde0ed}
+
+/* ── 히어로 ── */
+.hero{background:linear-gradient(135deg,#3a56d4,#6d28d9);color:#fff;padding:24px 24px 0}
+.hero h1{font-size:20px;font-weight:800;letter-spacing:-.4px}
+.hero-meta{font-size:12px;opacity:.75;margin-top:5px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:rgba(255,255,255,.12);border-radius:12px 12px 0 0;margin-top:20px}
+.kpi{padding:16px 12px;text-align:center;border-right:1px solid rgba(255,255,255,.15)}
+.kpi:last-child{border-right:none}
+.kpi-v{font-size:22px;font-weight:800;line-height:1}
+.kpi-l{font-size:10px;opacity:.65;margin-top:3px}
+
+/* ── 진행바 ── */
+.prog-wrap{background:#fff;border-bottom:1px solid #e8eaf0;padding:16px 24px;overflow-x:auto}
+.prog{display:flex;min-width:560px}
+.ps{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.ps::before{content:'';position:absolute;top:13px;left:50%;right:-50%;height:2px;background:#e8eaf0;z-index:0}
+.ps:last-child::before{display:none}
+.ps.done::before{background:#4361ee}
+.ps.now::before{background:linear-gradient(90deg,#4361ee 50%,#e8eaf0 50%)}
+.pc{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;position:relative;z-index:1;border:2px solid #e8eaf0;background:#fff;color:#c0c4d8}
+.ps.done .pc{background:#4361ee;border-color:#4361ee;color:#fff}
+.ps.now .pc{background:#4361ee;border-color:#4361ee;color:#fff;box-shadow:0 0 0 4px rgba(67,97,238,.2)}
+.pn{font-size:9px;color:#aab0c8;margin-top:5px;text-align:center;font-weight:600}
+.ps.done .pn,.ps.now .pn{color:#4361ee;font-weight:700}
+
+/* ── 레이아웃 ── */
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 160px)}
+
+/* ── 사이드바 ── */
+.sidebar{background:#fff;border-right:1px solid #e8eaf0;padding:12px 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto}
+.sb-sect{padding:10px 16px 4px;font-size:9px;font-weight:700;color:#c0c4d8;text-transform:uppercase;letter-spacing:.1em;margin-top:6px}
+.mi{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;border-left:3px solid transparent;transition:all .13s}
+.mi:hover{background:#f8f9ff;border-left-color:#c5ccf8}
+.mi.on{background:#f0f3ff;border-left-color:#4361ee}
+.mi-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.mi-t{font-size:12.5px;font-weight:600;color:#1a1d2e}
+.mi.on .mi-t{color:#4361ee}
+.mi-s{font-size:10px;color:#aab0c8;margin-top:1px}
+.badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:700;margin-left:auto}
+.b-red{background:#fff0f6;color:#f72585;border:1px solid #ffb3d6}
+.b-blue{background:#f0f3ff;color:#4361ee;border:1px solid #c5ccf8}
+.b-green{background:#e8fff2;color:#00a854;border:1px solid #b7ebd5}
+.b-gray{background:#f0f2f8;color:#8890b0;border:1px solid #dde0ed}
+
+/* ── 콘텐츠 ── */
+.content{padding:24px;overflow-y:auto}
+.panel{display:none}.panel.on{display:block}
+.ph{margin-bottom:20px}
+.ph h2{font-size:18px;font-weight:800}
+.ph p{font-size:12px;color:#8890b0;margin-top:3px}
+
+/* ── 카드 ── */
+.card{background:#fff;border:1px solid #e8eaf0;border-radius:12px;margin-bottom:14px;overflow:hidden}
+.ch{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;cursor:pointer;transition:background .13s}
+.ch:hover{background:#fafbff}
+.ci{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ct{flex:1}
+.cd{font-size:10px;font-weight:700;color:#aab0c8;margin-bottom:3px}
+.ctitle{font-size:14px;font-weight:700;color:#1a1d2e;line-height:1.35}
+.csub{font-size:11.5px;color:#8890b0;margin-top:4px;line-height:1.5}
+.cr{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.exp{width:26px;height:26px;border-radius:50%;border:1px solid #e8eaf0;background:#f8f9ff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aab0c8;cursor:pointer;transition:all .15s;flex-shrink:0}
+.card.open .exp{background:#4361ee;color:#fff;border-color:#4361ee;transform:rotate(180deg)}
+.cb{display:none;padding:0 18px 18px;border-top:1px solid #f0f2f8;margin-top:0}
+.card.open .cb{display:block}
+.card.open .ch{background:#f8f9ff}
+
+/* ── 디테일 그리드 ── */
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.dg.full1{grid-template-columns:1fr}
+.db{background:#f8f9ff;border-radius:8px;padding:13px;font-size:13px}
+.db.full{grid-column:1/-1}
+.db h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;color:#4361ee}
+.db ul{padding-left:15px}.db ul li{line-height:1.7;color:#3a3f5c;margin-bottom:1px}
+.db p{line-height:1.7;color:#3a3f5c}
+.db.ok{background:#f0fff8;border:1px solid #b7ebd5}.db.ok h4{color:#00a854}
+.db.warn{background:#fff8f9;border:1px solid #ffc8dd}.db.warn h4{color:#f72585}
+.db.danger{background:#fffbf0;border:1px solid #f5d87a}.db.danger h4{color:#b07c00}
+.db.bad{background:#fff0f6;border:1px solid #ffc8dd}.db.bad h4{color:#c9184a}
+
+/* ── 태그 ── */
+.tag{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin:2px 2px 2px 0;text-transform:uppercase;letter-spacing:.03em}
+.tp{background:#e8fff2;color:#00a854;border:1px solid #b7ebd5}
+.td{background:#e8f0ff;color:#4361ee;border:1px solid #bdd0ff}
+.tc{background:#f3e8ff;color:#7209b7;border:1px solid #d9b8ff}
+.tb{background:#fff8e0;color:#b07c00;border:1px solid #fde870}
+.ti{background:#ffe8f0;color:#c9184a;border:1px solid #ffb3c6}
+.tf{background:#f0f2f8;color:#8890b0;border:1px solid #d8dced}
+.tw{background:#fff0f6;color:#f72585;border:1px solid #ffb3d6}
+
+/* ── 모순 카드 ── */
+.con{background:#fff8f9;border:2px solid #ffc8dd;border-radius:12px;padding:18px;margin-bottom:14px}
+.con-n{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#f72585;color:#fff;border-radius:50%;font-size:10px;font-weight:800;margin-bottom:8px}
+.con h3{font-size:14px;font-weight:700;color:#c9184a;margin-bottom:8px}
+.vs{display:grid;grid-template-columns:1fr 40px 1fr;gap:10px;align-items:center;margin-top:12px}
+.vb{background:#fff;border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:#3a3f5c}
+.vb strong{display:block;font-size:9px;font-weight:700;text-transform:uppercase;margin-bottom:5px;letter-spacing:.06em}
+.vb.vl strong{color:#00a854}.vb.vr strong{color:#4361ee}
+.va{font-size:18px;color:#f72585;font-weight:800;text-align:center}
+
+/* ── 시나리오 ── */
+.scg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.sc{border-radius:10px;padding:16px;border:2px solid transparent;cursor:default}
+.sc-pct{font-size:26px;font-weight:800;line-height:1}
+.sc-t{font-size:13px;font-weight:700;margin:6px 0 4px}
+.sc-d{font-size:11.5px;color:#6b7280;line-height:1.5}
+.sc-bar{height:3px;border-radius:2px;margin-top:10px;background:#e8eaf0}
+.sc-fill{height:100%;border-radius:2px}
+.s1{background:#e8f0ff;border-color:#bdd0ff}.s1 .sc-pct{color:#4361ee}.s1 .sc-fill{background:#4361ee;width:32%}
+.s2{background:#e8fff2;border-color:#b7ebd5}.s2 .sc-pct{color:#00a854}.s2 .sc-fill{background:#00a854;width:32%}
+.s3{background:#f3e8ff;border-color:#d9b8ff}.s3 .sc-pct{color:#7209b7}.s3 .sc-fill{background:#7209b7;width:22%}
+.s4{background:#f0f2f8;border-color:#dde0ed}.s4 .sc-pct{color:#8890b0}.s4 .sc-fill{background:#8890b0;width:8%}
+
+/* ── 준비서면 뷰어 ── */
+.doc-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.doc-item{background:#fff;border:1px solid #e8eaf0;border-radius:10px;overflow:hidden}
+.doc-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;transition:background .13s}
+.doc-header:hover{background:#f8f9ff}
+.doc-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.doc-info{flex:1}
+.doc-title{font-size:13px;font-weight:700;color:#1a1d2e}
+.doc-meta{font-size:11px;color:#aab0c8;margin-top:2px}
+.doc-body{display:none;border-top:1px solid #f0f2f8}
+.doc-item.open .doc-body{display:block}
+.doc-nav{display:flex;gap:6px;padding:12px 16px;border-bottom:1px solid #f0f2f8;flex-wrap:wrap}
+.doc-tab{padding:5px 12px;border-radius:20px;border:1px solid #e8eaf0;background:transparent;font-size:11px;font-weight:600;cursor:pointer;color:#8890b0;font-family:inherit;transition:all .13s}
+.doc-tab.on{background:#4361ee;border-color:#4361ee;color:#fff}
+.doc-content{padding:16px;font-size:13px;line-height:1.8;color:#2d3148;white-space:pre-wrap;max-height:500px;overflow-y:auto;background:#fafbff}
+.doc-section{margin-bottom:20px}
+.doc-section h3{font-size:13px;font-weight:700;color:#4361ee;border-bottom:1px solid #e8eaf0;padding-bottom:6px;margin-bottom:10px}
+.doc-section p{font-size:12.5px;line-height:1.8;color:#3a3f5c;margin-bottom:8px}
+.doc-section ul{padding-left:18px}.doc-section ul li{font-size:12.5px;line-height:1.8;color:#3a3f5c;margin-bottom:3px}
+.doc-highlight{background:#fff3cd;border-left:3px solid #f5c842;padding:10px 14px;border-radius:0 6px 6px 0;margin:10px 0;font-size:12.5px;line-height:1.7}
+.doc-warn{background:#fff8f9;border-left:3px solid #f72585;padding:10px 14px;border-radius:0 6px 6px 0;margin:10px 0;font-size:12.5px;line-height:1.7;color:#c9184a}
+.doc-ok{background:#f0fff8;border-left:3px solid #00a854;padding:10px 14px;border-radius:0 6px 6px 0;margin:10px 0;font-size:12.5px;line-height:1.7;color:#00a854}
+
+/* ── 증거표 ── */
+.etbl{width:100%;border-collapse:collapse}
+.etbl th{text-align:left;font-size:10px;font-weight:700;color:#8890b0;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:2px solid #e8eaf0}
+.etbl td{padding:9px 10px;border-bottom:1px solid #f0f2f8;font-size:12.5px;vertical-align:top}
+.etbl tr:hover td{background:#f8f9ff}
+.en{font-family:monospace;font-weight:700;color:#4361ee;white-space:nowrap;font-size:11px}
+.ep{font-size:10px;font-weight:700}
+.ep-p{color:#00a854}.ep-d{color:#4361ee}
+
+/* ── 불리한 내용 ── */
+.risk{background:#fffbf0;border:2px solid #f5d87a;border-radius:12px;padding:18px;margin-bottom:14px}
+.risk-lv{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px}
+.lv-high{background:#fff0f6;color:#f72585;border:1px solid #ffb3d6}
+.lv-mid{background:#fffbf0;color:#b07c00;border:1px solid #f5d87a}
+.lv-low{background:#f0f2f8;color:#8890b0;border:1px solid #dde0ed}
+.risk h3{font-size:14px;font-weight:700;color:#92400e;margin-bottom:6px}
+.risk-body{font-size:13px;line-height:1.7;color:#44370d;margin-top:8px}
+.risk-counter{background:#fff;border-radius:8px;padding:12px;margin-top:10px;border:1px solid #fde68a}
+.risk-counter h4{font-size:10px;font-weight:700;color:#4361ee;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+
+/* ── 반응형 ── */
+@media(max-width:860px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:relative;height:auto;display:flex;overflow-x:auto;padding:6px 0;border-right:none;border-bottom:1px solid #e8eaf0}
+  .sb-sect{display:none}
+  .mi{flex-direction:column;padding:8px 10px;text-align:center;border-left:none;border-bottom:3px solid transparent;min-width:70px}
+  .mi.on{border-left:none;border-bottom-color:#4361ee;background:#f0f3ff}
+  .mi-s,.badge{display:none}
+  .mi-icon{margin:0 auto}
+  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .kpi:nth-child(n+4){display:none}
+  .dg{grid-template-columns:1fr}
+  .scg{grid-template-columns:1fr}
+  .vs{grid-template-columns:1fr}
+  .va{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- 네비 -->
+<nav class="nav">
+  <div class="logo">Lex<span>Board</span></div>
+  <div class="nav-case"><strong>2025나210335 위약벌 등</strong>서울고등법원 제5-3민사부</div>
+  <div class="nav-r">
+    <div class="pill pill-live">⚡ 2심 진행 중</div>
+    <div class="pill pill-date">2026. 6. 15.</div>
+  </div>
+</nav>
+
+<!-- 히어로 -->
+<div class="hero">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <h1>안민현 vs 윤형석</h1>
+      <div class="hero-meta">원고: 법무법인 수안 &nbsp;|&nbsp; 피고: 법무법인 사유 &nbsp;|&nbsp; 2021 ~ 현재</div>
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-v">6,000만</div><div class="kpi-l">1심 지급명령</div></div>
+    <div class="kpi"><div class="kpi-v">5,000만</div><div class="kpi-l">위약벌</div></div>
+    <div class="kpi"><div class="kpi-v">1,000만</div><div class="kpi-l">손배예정액</div></div>
+    <div class="kpi"><div class="kpi-v">~20억</div><div class="kpi-l">원고 개인매출</div></div>
+    <div class="kpi"><div class="kpi-v">3건</div><div class="kpi-l">진행 중 소송</div></div>
+  </div>
+</div>
+
+<!-- 진행바 -->
+<div class="prog-wrap">
+  <div class="prog">
+    <div class="ps done"><div class="pc">✓</div><div class="pn">1심판결</div></div>
+    <div class="ps done"><div class="pc">✓</div><div class="pn">항소제기</div></div>
+    <div class="ps done"><div class="pc">✓</div><div class="pn">서면교환</div></div>
+    <div class="ps done"><div class="pc">✓</div><div class="pn">제1회변론</div></div>
+    <div class="ps now"><div class="pc">◎</div><div class="pn">자료제출</div></div>
+    <div class="ps"><div class="pc">6</div><div class="pn">제2회변론</div></div>
+    <div class="ps"><div class="pc">7</div><div class="pn">변론종결</div></div>
+    <div class="ps"><div class="pc">8</div><div class="pn">판결선고</div></div>
+  </div>
+</div>
+
+<!-- 레이아웃 -->
+<div class="layout">
+
+<!-- 사이드바 -->
+<aside class="sidebar">
+  <div class="sb-sect">핵심 분석</div>
+  <div class="mi on" onclick="go('overview')">
+    <div class="mi-icon" style="background:#eef2ff">📋</div>
+    <div><div class="mi-t">사건 개요</div><div class="mi-s">한눈에 보기</div></div>
+  </div>
+  <div class="mi" onclick="go('risk')">
+    <div class="mi-icon" style="background:#fffbf0">🔥</div>
+    <div><div class="mi-t">불리한 내용</div><div class="mi-s">솔직한 위험 분석</div></div>
+    <span class="badge b-red">4건</span>
+  </div>
+  <div class="mi" onclick="go('strong')">
+    <div class="mi-icon" style="background:#fff0f6">⚔️</div>
+    <div><div class="mi-t">유리한 논거</div><div class="mi-s">상대방 모순·약점</div></div>
+    <span class="badge b-blue">4건</span>
+  </div>
+  <div class="mi" onclick="go('scenario')">
+    <div class="mi-icon" style="background:#f3e8ff">🎯</div>
+    <div><div class="mi-t">판결 예측</div><div class="mi-s">4가지 시나리오</div></div>
+  </div>
+
+  <div class="sb-sect">제출 서면</div>
+  <div class="mi" onclick="go('docs')">
+    <div class="mi-icon" style="background:#e8f0ff">📄</div>
+    <div><div class="mi-t">준비서면 모음</div><div class="mi-s">클릭하면 원문 보기</div></div>
+    <span class="badge b-blue">5건</span>
+  </div>
+  <div class="mi" onclick="go('now')">
+    <div class="mi-icon" style="background:#e8fff2">✏️</div>
+    <div><div class="mi-t">이번 제출 서면</div><div class="mi-s">2026. 6. 15.</div></div>
+    <span class="badge b-green">신규</span>
+  </div>
+
+  <div class="sb-sect">기록</div>
+  <div class="mi" onclick="go('timeline')">
+    <div class="mi-icon" style="background:#f0f2f8">📅</div>
+    <div><div class="mi-t">전체 타임라인</div><div class="mi-s">2021 ~ 현재</div></div>
+  </div>
+  <div class="mi" onclick="go('evidence')">
+    <div class="mi-icon" style="background:#f0f2f8">📎</div>
+    <div><div class="mi-t">증거 목록</div><div class="mi-s">갑·을 호증</div></div>
+  </div>
+</aside>
+
+<!-- 콘텐츠 -->
+<div class="content">
+
+<!-- ════ 사건 개요 ════ -->
+<div id="p-overview" class="panel on">
+  <div class="ph"><h2>📋 사건 개요</h2><p>항목을 클릭하면 세부 내용이 펼쳐집니다</p></div>
+
+  <div class="card open">
+    <div class="ch" onclick="tog(this)">
+      <div class="ci" style="background:#eef2ff">👥</div>
+      <div class="ct"><div class="cd">당사자</div><div class="ctitle">이 사건은 어떤 분쟁인가요?</div></div>
+      <div class="cr"><div class="exp">▾</div></div>
+    </div>
+    <div class="cb">
+      <div class="dg">
+        <div class="db ok"><h4>🟢 원고 — 안민현</h4><ul><li>㈜타무르 설립자 · 대표이사</li><li>타무르데이츠(대추야자) 판매업</li><li>소송대리인: 법무법인 수안 (조성우·곽혜원)</li><li>주장: 피고 경업금지 위반 → 위약벌 5,000만 원</li></ul></div>
+        <div class="db" style="background:#e8f0ff"><h4 style="color:#4361ee">🔵 피고 — 윤형석</h4><ul><li>2021. 3. 동업 참여 → 2022. 3. 퇴사</li><li>이후 ㈜하온 설립 (대추야자 판매)</li><li>소송대리인: 법무법인 사유 (최지현 외)</li><li>주장: 원고 선행위반 / 손실만 발생</li></ul></div>
+        <div class="db full"><h4>계약 내용 (2021. 3. 7.)</h4><ul><li>당사자: 원고·피고·장성휴 3인</li><li><strong>제3조:</strong> 경업금지 3년</li><li><strong>제6조 ①:</strong> 위약벌 각 5,000만 원</li><li><strong>제6조 ③:</strong> 손해배상예정액 5,000만 원</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch" onclick="tog(this)">
+      <div class="ci" style="background:#fff8e0">⚖️</div>
+      <div class="ct"><div class="cd">1심 결과 (2025. 9.)</div><div class="ctitle">법원은 어떻게 판결했나요?</div><div class="csub">위약벌 5,000만 원 + 손배 1,000만 원 = 합계 6,000만 원 지급 명령</div></div>
+      <div class="cr"><div class="exp">▾</div></div>
+    </div>
+    <div class="cb">
+      <div class="dg">
+        <div class="db ok"><h4>✅ 피고 유리</h4><ul><li>손배예정액 5,000 → <strong>1,000만 원</strong> (80% 감액)</li><li>부정경쟁행위 청구 <strong>전부 기각</strong></li><li>"보호가치 있는 이익 없음" 명시 (판결문 14쪽)</li></ul></div>
+        <div class="db bad"><h4>❌ 피고 불리</h4><ul><li>위약벌 <strong>5,000만 원 전액</strong> 인정</li><li>경업금지의무 위반 인정</li></ul></div>
+        <div class="db warn full"><h4>⚠️ 핵심 모순 — 피고 항소의 출발점</h4><p>원심이 스스로 "보호가치 있는 이익이 없다"고 인정하면서도 위약벌 5,000만 원을 전액 인정한 것은 논리적 자기모순입니다. 보호할 이익이 없다면 그 침해로 인한 손해도 발생할 수 없기 때문입니다.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch" onclick="tog(this)">
+      <div class="ci" style="background:#fff0f6">🚨</div>
+      <div class="ct"><div class="cd">2026. 6. 15. 기준</div><div class="ctitle">지금 당장 중요한 것</div></div>
+      <div class="cr"><span class="tag tw">긴급</span><div class="exp">▾</div></div>
+    </div>
+    <div class="cb">
+      <div class="dg dg full1">
+        <div class="db warn"><h4>🔴 셀온 매출자료 대응</h4><p>재판부가 하온·셀온 전채널 판매자료 제출 요청. 셀온은 피고가 임직원이 아니므로 민사소송법 제344조상 제출의무 없음을 명시 + "피고 매출 ≠ 원고 손해" 논리 선점 필요.</p></div>
+        <div class="db warn"><h4>🔴 상표 단독출원 해명 서면</h4><p>피고가 재직 중(2022. 2. 3.) 타무르데이츠 상표를 단독 출원한 사실에 대해 구체적인 해명 서면이 아직 없습니다. 원고 측이 이를 법원 심증에 가장 강하게 활용 중입니다.</p></div>
+        <div class="db ok"><h4>🟢 과세정보제출명령 신청 (오늘 제출)</h4><p>원고 개인사업자 + ㈜타무르 부가가치세 신고 내역 요청. 원고 경업위반 규모(약 20억 원) 입증의 핵심 카드.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 불리한 내용 ════ -->
+<div id="p-risk" class="panel">
+  <div class="ph"><h2>🔥 피고에게 불리한 내용</h2><p>솔직한 위험 분석 — 각 항목 클릭 시 대응 전략도 함께 확인</p></div>
+
+  <div class="risk">
+    <div class="risk-lv lv-high">🔴 위험도 높음</div>
+    <h3>재직 중 상표 단독 출원 (2022. 2. 3.)</h3>
+    <div class="risk-body">
+      피고가 ㈜타무르에 재직 중이던 시점, 원고에게 알리지 않고 '타무르데이츠' 상표를 <strong>단독 출원</strong>했습니다. 이후 "타무르앤코가 타무르데이츠의 유일한 정품 판매사"라는 허위 공지를 게시하여 원고 제품을 유사품처럼 오인하게 했습니다.<br><br>
+      원고 측이 이 사실을 법원 심증에 가장 강하게 활용하고 있으며, 현재까지 피고 측의 구체적 해명 서면이 없는 상태입니다.
+    </div>
+    <div class="risk-counter">
+      <h4>💡 현재 대응 전략</h4>
+      <p style="font-size:12.5px;line-height:1.7;color:#3a3f5c">상표 출원 당시의 경위(공동사업 정리 과정에서의 자산 보전 목적 등)를 구체적으로 해명하는 서면을 다음 변론기일 전에 반드시 제출해야 합니다. 현재 준비서면에서 누락된 가장 큰 공백입니다.</p>
+    </div>
+  </div>
+
+  <div class="risk">
+    <div class="risk-lv lv-high">🔴 위험도 높음</div>
+    <h3>원심에서 "자진 퇴사"를 인정한 발언 (2024. 4. 3. 준비서면)</h3>
+    <div class="risk-body">
+      피고 측이 원심(1심) 준비서면에서 <strong>"피고 윤형석에게 원고 주식회사 타무르를 인수할 자금이 없었기 때문에 피고 윤형석이 원고 주식회사 타무르를 나감으로써 동업 관계가 마쳐지게 되었습니다"</strong>라고 진술했습니다.<br><br>
+      원고 측이 이 문구를 정확히 인용하여 "피고 스스로 자진퇴사를 인정했다"는 논거로 강하게 활용하고 있습니다.
+    </div>
+    <div class="risk-counter">
+      <h4>💡 대응 전략</h4>
+      <p style="font-size:12.5px;line-height:1.7;color:#3a3f5c">해당 발언의 정확한 맥락을 복원해야 합니다. 지분 인수를 못한 것과 원고의 강압적 종료 통보는 별개입니다. 원고가 2022. 1. 29. 먼저 동업 종료를 통보한 카카오톡(을 제25호증)과 연결하여, "원고의 강요로 어쩔 수 없이 나온 것"임을 재구성해야 합니다.</p>
+    </div>
+  </div>
+
+  <div class="risk">
+    <div class="risk-lv lv-mid">🟡 위험도 중간</div>
+    <h3>셀온 매출 86억 원 — 원고 측 손해액 주장 가능성</h3>
+    <div class="risk-body">
+      이번에 제출한 셀온 부가가치세과세표준증명원(을 제31-1호증)에 따르면 셀온의 2022~2025년 매출합계가 약 86억 원입니다. 원고 측이 이 전체 금액을 경업금지 위반으로 인한 손해액의 근거로 주장할 가능성이 높습니다.
+    </div>
+    <div class="risk-counter">
+      <h4>💡 대응 전략</h4>
+      <p style="font-size:12.5px;line-height:1.7;color:#3a3f5c">① 셀온은 피고가 설립·운영한 사실이 없는 회사 (2018년 최석림 설립)<br>② 셀온 매출은 건강기능식품 등 다품목 전체 매출이며 대추야자만의 매출이 아님<br>③ 피고의 수익과 원고의 손해 사이 인과관계 없음<br>④ 원고 본인이 법인 판매를 중단했으므로 피고 경업이 없었어도 법인 매출은 없었을 것</p>
+    </div>
+  </div>
+
+  <div class="risk">
+    <div class="risk-lv lv-mid">🟡 위험도 중간</div>
+    <h3>하온 설립이 동업 탈퇴 직후 (2022. 3. 14.)</h3>
+    <div class="risk-body">
+      원심은 "피고가 탈퇴 후 1달이 지나기 전에 하온을 설립했다"는 사실을 경업금지약정 유효 근거 중 하나로 들었습니다. 객관적으로 탈퇴 직후 동종업체를 설립한 것은 사실이므로 완전히 부인하기 어렵습니다.
+    </div>
+    <div class="risk-counter">
+      <h4>💡 대응 전략</h4>
+      <p style="font-size:12.5px;line-height:1.7;color:#3a3f5c">① 원고가 먼저 동업 종료를 통보(2022. 1. 29.)하고 피고를 퇴사 처리(2022. 3. 8.)한 이후의 일<br>② 원고 본인도 그즈음(2022. 3. 10.경) 개인사업자 명의 동종영업을 개시<br>③ 하온 사업은 이익 없이 총 7,600만 원의 손실 발생 → 실질적 경쟁이 없었음</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 유리한 논거 ════ -->
+<div id="p-strong" class="panel">
+  <div class="ph"><h2>⚔️ 피고에게 유리한 논거</h2><p>원고 측의 모순 · 피고의 반격 포인트</p></div>
+
+  <div class="con">
+    <div class="con-n">1</div>
+    <h3>주주 지위 — 소송마다 다른 말</h3>
+    <div style="margin-bottom:8px"><span class="tag tw">최우선 논거</span><span class="tag tb">별소 연계</span></div>
+    <div class="vs">
+      <div class="vb vl"><strong>🟢 본소 (위약벌 청구)</strong>"주주간 계약 위반"을 이유로 위약벌 5,000만 원 청구 → 피고의 주주 지위를 <strong>전제</strong></div>
+      <div class="va">⚡</div>
+      <div class="vb vr"><strong>🔵 별소 (장부열람 방어)</strong>피고가 주주 자격으로 장부열람 신청하자 "피고는 주주가 아니다"라고 <strong>부정</strong></div>
+    </div>
+    <div class="db warn" style="margin-top:12px"><h4>법적 의미 — 금반언 원칙 위반</h4><p>한 소송에서 주주 지위를 전제로 청구하면서, 다른 소송에서 그 지위를 부정하는 것은 금반언 원칙에 반합니다. 2심에서 1순위로 전면화해야 하는 논거입니다.</p></div>
+  </div>
+
+  <div class="con">
+    <div class="con-n">2</div>
+    <h3>원심 자기모순 — 보호가치 없음 + 위약벌 전액</h3>
+    <div style="margin-bottom:8px"><span class="tag tw">항소 핵심</span><span class="tag tc">판결문 모순</span></div>
+    <div class="vs">
+      <div class="vb vl"><strong>🟢 부정경쟁행위 기각 (판결문 14쪽)</strong>"제조방법·노하우·거래처 등이 법률상 보호가치를 취득하기 어렵다" → 보호가치 있는 이익 <strong>없음</strong></div>
+      <div class="va">⚡</div>
+      <div class="vb vr"><strong>🔵 위약벌 전액 인정</strong>그 이익의 침해를 전제로 한 위약벌 5,000만 원 <strong>전액 인정</strong></div>
+    </div>
+    <div class="db warn" style="margin-top:12px"><h4>법적 의미</h4><p>보호가치 있는 이익이 없다면 그 침해로 인한 손해도 발생할 수 없습니다. 원심의 판단은 스스로 인정한 사실과 결론이 충돌하는 자기모순입니다.</p></div>
+  </div>
+
+  <div class="con">
+    <div class="con-n">3</div>
+    <h3>원고가 먼저 경업금지 위반</h3>
+    <div style="margin-bottom:8px"><span class="tag tw">선행위반</span><span class="tag ti">신의칙</span></div>
+    <div class="vs">
+      <div class="vb vl"><strong>🟢 원고의 행위 (2022. 3. 10.경)</strong>피고 퇴사 처리 직후 개인사업자 명의 동일 상품 판매 개시 / 피고 하온 설립(3. 14.)보다 <strong>먼저</strong> / 추정 매출 약 20억 원</div>
+      <div class="va">⚡</div>
+      <div class="vb vr"><strong>🔵 원고의 청구</strong>피고에게만 경업금지 위반으로 위약벌 5,000만 원 청구 / 본인 위반은 "별개 사안"이라 주장</div>
+    </div>
+    <div class="db warn" style="margin-top:12px"><h4>법적 의미 — 신의칙·권리남용</h4><p>스스로 계약을 위반하고 손해 발생의 주된 원인을 제공한 원고가, 피고의 행위만 문제 삼아 위약벌을 청구하는 것은 신의성실 원칙 및 금반언 원칙에 반하는 권리남용입니다.</p></div>
+  </div>
+
+  <div class="con">
+    <div class="con-n">4</div>
+    <h3>피고는 경업으로 이익이 아닌 손실 발생</h3>
+    <div style="margin-bottom:8px"><span class="tag td">손실 증거</span><span class="tag tb">위약벌 무효</span></div>
+    <div class="vs">
+      <div class="vb vl"><strong>🟢 피고의 실제 상황</strong>하온 대추야자 사업 총 손실 약 <strong>7,600만 원</strong> / 피고 부담 약 <strong>2,535만 원</strong> / 2025. 2.부터 매월 150만 원 자발적 변제</div>
+      <div class="va">⚡</div>
+      <div class="vb vr"><strong>🔵 원고의 위약벌 청구</strong>피고가 경업으로 이익을 취했다는 전제하에 위약벌 5,000만 원 청구 / 피고의 실제 손실은 외면</div>
+    </div>
+    <div class="db ok" style="margin-top:12px"><h4>법적 의미 — 공서양속 위반 보강</h4><p>경업으로 이익은커녕 손실을 부담하며 이를 성실히 변제하는 피고에게 5,000만 원의 위약벌을 부과하는 것은 그 의무 강제로 얻는 채권자 이익에 비해 과도하게 무거워 공서양속에 반합니다.</p></div>
+  </div>
+</div>
+
+<!-- ════ 판결 예측 ════ -->
+<div id="p-scenario" class="panel">
+  <div class="ph"><h2>🎯 판결 시나리오 예측</h2><p>현재 증거 구조와 법리 기준 — 4가지 예상 결과</p></div>
+
+  <div class="scg">
+    <div class="sc s1"><div class="sc-pct">30~35%</div><div class="sc-t">① 원심 유지</div><div class="sc-d">위약벌 5,000만 원 + 손배 1,000만 원. 피고·원고 항소 모두 기각.</div><div class="sc-bar"><div class="sc-fill"></div></div></div>
+    <div class="sc s2"><div class="sc-pct">30~35%</div><div class="sc-t">② 손배예정액 증액</div><div class="sc-d">원고 부대항소 일부 인용. 손배예정액 2,000~3,000만 원으로 증액. 피고 불리.</div><div class="sc-bar"><div class="sc-fill"></div></div></div>
+    <div class="sc s3"><div class="sc-pct">20~25%</div><div class="sc-t">③ 위약벌 감액</div><div class="sc-d">위약벌 일부 공서양속 위반 무효. 1,000~2,000만 원 수준. 피고 부분 승소.</div><div class="sc-bar"><div class="sc-fill"></div></div></div>
+    <div class="sc s4"><div class="sc-pct">&lt;10%</div><div class="sc-t">④ 경업금지 전부 무효</div><div class="sc-d">경업금지약정 자체 무효. 위약벌·손배 모두 기각. 피고 완전 승소.</div><div class="sc-bar"><div class="sc-fill"></div></div></div>
+  </div>
+
+  <div class="card open">
+    <div class="ch" onclick="tog(this)">
+      <div class="ci" style="background:#eef2ff">🔍</div>
+      <div class="ct"><div class="ctitle">재판부 관심 포인트 분석</div><div class="csub">2026. 5. 14. 제1회 변론기일 신호</div></div>
+      <div class="cr"><div class="exp">▾</div></div>
+    </div>
+    <div class="cb">
+      <div class="dg">
+        <div class="db danger"><h4>재판부 신호</h4><p>매출자료 임의제출을 명령한 것은 <strong>손해배상예정액 감액 적정성</strong>에 관심이 집중되어 있다는 신호입니다. 위약벌 전면 취소보다는 금액 조정 쪽으로 무게가 실릴 가능성이 높습니다.</p></div>
+        <div class="db"><h4>승패를 가를 변수</h4><ul><li>셀온 매출자료 제출 여부</li><li>과세정보제출명령 결과</li><li>원고 개인사업자 매출 규모 확인</li><li>상표 단독출원 해명 서면</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 준비서면 모음 ════ -->
+<div id="p-docs" class="panel">
+  <div class="ph"><h2>📄 준비서면 모음</h2><p>탭을 선택하면 주요 내용을 볼 수 있습니다</p></div>
+
+  <div class="doc-list">
+
+    <!-- 서면 1 -->
+    <div class="doc-item">
+      <div class="doc-header" onclick="togDoc(this)">
+        <div class="doc-icon" style="background:#e8f0ff">📘</div>
+        <div class="doc-info">
+          <div class="doc-title">피고 항소이유서</div>
+          <div class="doc-meta">2025. 12. 29. · 법무법인 사유 · 13쪽</div>
+        </div>
+        <span class="tag td">피고</span>
+        <div class="exp" style="margin-left:8px">▾</div>
+      </div>
+      <div class="doc-body">
+        <div class="doc-nav">
+          <button class="doc-tab on" onclick="docTab(this,'d1-1')">핵심 주장</button>
+          <button class="doc-tab" onclick="docTab(this,'d1-2')">위약벌 무효</button>
+          <button class="doc-tab" onclick="docTab(this,'d1-3')">경업금지 무효</button>
+          <button class="doc-tab" onclick="docTab(this,'d1-4')">원고 선행위반</button>
+        </div>
+        <div class="doc-content">
+          <div id="d1-1">
+            <div class="doc-section">
+              <h3>항소이유 요지 (5가지)</h3>
+              <div class="doc-highlight">① 원심이 스스로 인정한 보호가치 부존재와 손해배상 인정 사이에 논리적 모순이 있고</div>
+              <div class="doc-highlight">② 원고의 선행적 계약위반 행위가 손해 발생의 주된 원인을 제공하였으며</div>
+              <div class="doc-highlight">③ 이러한 상황에서 피고에게만 손해 전부를 귀속시키는 것은 신의성실원칙에 반하는 권리남용</div>
+              <div class="doc-highlight">④ 경업금지약정은 피고의 직업선택의 자유와 생존권을 과도하게 침해하여 무효</div>
+              <div class="doc-highlight">⑤ 위약벌 약정은 공서양속에 반하여 무효</div>
+            </div>
+            <div class="doc-section">
+              <h3>항소 취지</h3>
+              <p>원심이 인정한 위약벌 5,000만 원 및 손해배상예정액 1,000만 원이 부당하게 과다하므로 대폭 감액되거나 면제되어야 한다.</p>
+            </div>
+          </div>
+          <div id="d1-2" style="display:none">
+            <div class="doc-section">
+              <h3>위약벌 공서양속 위반 (대법원 2022. 7. 21. 선고 2018다248855 전원합의체)</h3>
+              <p>위약벌 약정은 채무의 이행을 확보하기 위하여 정해지는 것으로서, 원칙적으로 그 액을 감액할 수 없으나, 그 의무의 강제로 얻어지는 채권자의 이익에 비하여 약정된 벌이 과도하게 무거울 때에는 일부 또는 전부가 공서양속에 반하여 무효로 됩니다.</p>
+              <div class="doc-warn">① 원심 스스로 보호가치 있는 이익의 부존재를 인정</div>
+              <div class="doc-warn">② 위약벌 5,000만 원은 피고 총 출자금(1,426만 원)의 3.5배 초과</div>
+              <div class="doc-warn">③ 동업관계 파탄의 주된 원인을 원고가 제공</div>
+              <div class="doc-warn">④ 원고에게 발생한 구체적 손해가 입증되지 않음</div>
+            </div>
+          </div>
+          <div id="d1-3" style="display:none">
+            <div class="doc-section">
+              <h3>경업금지약정 무효 (민법 제103조)</h3>
+              <p>경업금지약정의 유효성은 보호할 가치 있는 사용자의 이익, 근로자의 퇴직 전 지위, 경업 제한의 기간·지역 및 대상 직종, 근로자에 대한 대가의 제공 유무, 근로자의 퇴직 경위, 공공의 이익 및 기타 사정 등을 종합적으로 고려하여야 합니다. (대법원 2010. 3. 11. 선고 2009다82244)</p>
+              <div class="doc-warn">핵심 — 피고는 경업금지에 대한 어떠한 대가도 받지 못함</div>
+              <ul>
+                <li>투자금 1,426만 원 미반환</li>
+                <li>보수 미지급</li>
+                <li>퇴사 시 정산금 전무</li>
+                <li>3년이라는 장기간 경업 금지</li>
+              </ul>
+              <div class="doc-ok">유사 판례 인용: 서울동부지법 2016가단127323 — 대가 없는 경업금지약정은 공서양속 위반으로 무효</div>
+            </div>
+          </div>
+          <div id="d1-4" style="display:none">
+            <div class="doc-section">
+              <h3>원고의 선행적 계약위반</h3>
+              <table style="width:100%;border-collapse:collapse;font-size:12px">
+                <tr style="background:#f0f3ff"><td style="padding:6px 10px;font-weight:700">날짜</td><td style="padding:6px 10px;font-weight:700">내용</td></tr>
+                <tr><td style="padding:6px 10px;border-bottom:1px solid #eee">2022. 1. 29.</td><td style="padding:6px 10px;border-bottom:1px solid #eee">원고 "너와 같이 타무르를 못할 것 같다" (동업 종료 먼저 통보)</td></tr>
+                <tr><td style="padding:6px 10px;border-bottom:1px solid #eee">2022. 3. 8.</td><td style="padding:6px 10px;border-bottom:1px solid #eee">원고 일방적 피고 퇴사 처리</td></tr>
+                <tr style="background:#fff8f9"><td style="padding:6px 10px;border-bottom:1px solid #eee;font-weight:700">2022. 3. 10.경</td><td style="padding:6px 10px;border-bottom:1px solid #eee;font-weight:700;color:#c9184a">원고 개인사업자 동종영업 개시 ← 피고보다 먼저!</td></tr>
+                <tr><td style="padding:6px 10px">2022. 3. 14.</td><td style="padding:6px 10px">피고 하온 설립</td></tr>
+              </table>
+              <div class="doc-ok" style="margin-top:12px">원고 개인사업자 추정 매출: 약 20억 원 (리뷰 건수 기반 최소 추정치)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 서면 2 -->
+    <div class="doc-item">
+      <div class="doc-header" onclick="togDoc(this)">
+        <div class="doc-icon" style="background:#e8f0ff">📘</div>
+        <div class="doc-info">
+          <div class="doc-title">피고 준비서면</div>
+          <div class="doc-meta">2026. 5. 12. · 법무법인 사유 · 13쪽</div>
+        </div>
+        <span class="tag td">피고</span>
+        <div class="exp" style="margin-left:8px">▾</div>
+      </div>
+      <div class="doc-body">
+        <div class="doc-nav">
+          <button class="doc-tab on" onclick="docTab(this,'d2-1')">자진탈퇴 반박</button>
+          <button class="doc-tab" onclick="docTab(this,'d2-2')">원고 선행경업</button>
+          <button class="doc-tab" onclick="docTab(this,'d2-3')">손해 부존재</button>
+          <button class="doc-tab" onclick="docTab(this,'d2-4')">셀온 무관성</button>
+        </div>
+        <div class="doc-content">
+          <div id="d2-1">
+            <div class="doc-section">
+              <h3>피고는 원고 강요로 탈퇴한 것</h3>
+              <p>원고는 피고가 일방적으로 동업관계를 탈퇴하였다고 주장합니다. 그러나 카카오톡 포렌식 자료(을 제25호증)에 의하면 원고가 먼저 피고에게 동업관계를 이어나갈 수 없다는 취지의 통보를 하였던 사실이 명백하게 드러납니다.</p>
+              <div class="doc-highlight">2022. 1. 29. 원고 발언: "더 이상 이런거에 감정소비하고는 싶지 않기에 나는 너와 같이 타무르를 못할 것 같다. 우선순위로 너한테 먼저 결정권을 줄께."</div>
+              <div class="doc-ok">피고 2022. 1. 30. 반응: "2월10일까지 시간을 줬음 해. 책임감없이 정리도 안하고 나갈 수가 없네" (피고가 오히려 유예 요청)</div>
+            </div>
+          </div>
+          <div id="d2-2" style="display:none">
+            <div class="doc-section">
+              <h3>원고가 먼저 경업금지 위반</h3>
+              <p>원고는 주식회사 타무르의 대표이사로서 충실의무가 있음에도, 개인사업자 명의로 주식회사 타무르의 주력상품과 동종 상품인 '타무르데이츠'를 네이버 스마트스토어 등에서 판매하였습니다.</p>
+              <div class="doc-warn">위 개인사업자 판매 페이지의 최초 리뷰 등록일이 2022. 3. 18. → 원고는 아무리 늦어도 2022. 3. 10.경에는 이미 개인사업자 명의 영업을 개시하였던 것으로 보입니다 (을 제23호증)</div>
+              <p style="margin-top:8px">즉 피고의 하온 설립(2022. 3. 14.)보다 원고의 경업이 먼저입니다.</p>
+            </div>
+          </div>
+          <div id="d2-3" style="display:none">
+            <div class="doc-section">
+              <h3>피고 경업금지의무 위반으로 인한 원고의 손해 사실상 부존재</h3>
+              <p>원고는 동업관계에 따라 주식회사 타무르의 대표이사로서 재직하면서 주식회사 타무르 명의의 네이버 스마트스토어에서는 대추야자의 판매를 중지하여 실제 판매가 이루어지지 않게끔 하였습니다. 반면, 자신의 개인사업자 명의의 네이버 스마트스토어를 이용하여 이익을 향유하였습니다.</p>
+              <div class="doc-ok">이와 같이 원고 스스로 주식회사 타무르의 경영은 방치한 채 개인 명의 사업체를 중심으로 수익 구조를 형성하여 온 이상, 설령 피고의 경업금지의무 위반 행위가 존재하지 않았다고 하더라도 원고가 주식회사 타무르 명의 사업을 통하여 이익을 확보하였을 가능성은 매우 희박합니다.</div>
+            </div>
+          </div>
+          <div id="d2-4" style="display:none">
+            <div class="doc-section">
+              <h3>주식회사 셀온은 피고와 무관한 회사</h3>
+              <div class="doc-ok">주식회사 셀온은 2018. 1. 4. 소외 최석림이 설립한 회사로, 주식회사 타무르 조차 설립되기도 전부터 전자담배 등 유통업을 영위하여 왔습니다.</div>
+              <p>피고는 주식회사 셀온의 임원이나 직원이 아니며, 임직원으로 근무한 사실이 전혀 없으므로 주식회사 셀온의 유통채널을 알지는 못하며, 그 자료에 대한 접근 권한도 없습니다.</p>
+              <div class="doc-warn">셀온 자료 미제출 이유: 최석림의 자발적인 협조가 절대적으로 필요한데, 최석림의 협조가 지연되고 있습니다. 민사소송법 제344조상 피고는 셀온 자료를 소지하지 않으므로 제출의무 없음.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 서면 3 — 원고 항소이유서 -->
+    <div class="doc-item">
+      <div class="doc-header" onclick="togDoc(this)">
+        <div class="doc-icon" style="background:#e8fff2">📗</div>
+        <div class="doc-info">
+          <div class="doc-title">원고 부대항소이유서 (상대방)</div>
+          <div class="doc-meta">2026. 3. 10. · 법무법인 수안 · 23쪽</div>
+        </div>
+        <span class="tag tp">원고</span>
+        <div class="exp" style="margin-left:8px">▾</div>
+      </div>
+      <div class="doc-body">
+        <div class="doc-nav">
+          <button class="doc-tab on" onclick="docTab(this,'d3-1')">원고 주요 주장</button>
+          <button class="doc-tab" onclick="docTab(this,'d3-2')">피고에 불리한 내용</button>
+          <button class="doc-tab" onclick="docTab(this,'d3-3')">우리 측 반박</button>
+        </div>
+        <div class="doc-content">
+          <div id="d3-1">
+            <div class="doc-section">
+              <h3>원고 항소 취지</h3>
+              <p>원심이 손해배상예정액 5,000만 원을 1,000만 원으로 감액한 것은 감액에 관한 법리를 오해한 것으로, 5,000만 원 전액이 인정되어야 합니다.</p>
+            </div>
+            <div class="doc-section">
+              <h3>원고 4가지 논거</h3>
+              <div class="doc-highlight">① 원·피고는 동등한 지위에서 협의하여 손해배상예정액 조항을 마련한 것이므로 피고는 경제적 약자가 아님</div>
+              <div class="doc-highlight">② 경업행위로 인한 손해는 장기 누적형으로 단기간에 확정될 수 없어 5,000만 원이 과다하지 않음</div>
+              <div class="doc-highlight">③ 피고는 이 사건 회사의 채무 부담을 피하려고 자진 퇴사한 것임</div>
+              <div class="doc-highlight">④ 피고(하온·셀온)의 매출액으로 원고의 손해를 간접 소명하겠음</div>
+            </div>
+          </div>
+          <div id="d3-2">
+            <div class="doc-section">
+              <h3>⚠️ 피고에게 불리한 원고 측 주장</h3>
+              <div class="doc-warn">① 피고가 재직 중(2022. 2. 3.) 타무르데이츠 상표를 단독 출원하고, "타무르앤코 = 유일한 정품 판매사" 허위 공지로 원고 제품을 유사품으로 폄훼 → 법원 심증에 가장 부정적 영향</div>
+              <div class="doc-warn">② 피고가 동종 포장상자를 동일 거래처에 의뢰하여 원고 제품을 모방 (갑 제22·23호증)</div>
+              <div class="doc-warn">③ 피고가 원심 준비서면에서 "타무르를 인수할 자금이 없어서 나갔다"고 자진퇴사를 인정한 발언 인용</div>
+              <div class="doc-warn">④ 피고는 2020년경부터 무단 결근 등 업무 소홀 (갑 제17·24호증)</div>
+            </div>
+          </div>
+          <div id="d3-3">
+            <div class="doc-section">
+              <h3>🔵 우리 측(피고) 반박 포인트</h3>
+              <div class="doc-ok">① 동등한 지위 주장 반박: 장성휴 카카오톡에서 "형석이는 새로 들어온 사람처럼 아무것도 모르는 상황"이라 발언 — 실질적 의사결정권이 원고에게 집중</div>
+              <div class="doc-ok">② 자진퇴사 발언 맥락: 원고가 먼저 탈퇴를 강요한 상황에서 지분 인수를 거부한 것이지, 자의로 탈퇴한 것이 아님</div>
+              <div class="doc-ok">③ 하온 총 손실 7,600만 원 — 경업으로 이익 취득했다는 주장을 직접 반박하는 핵심 증거</div>
+              <div class="doc-warn">⚠️ 상표 단독출원은 아직 구체적 해명 없음 — 반드시 서면 준비 필요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════ 이번 제출 서면 ════ -->
+<div id="p-now" class="panel">
+  <div class="ph"><h2>✏️ 이번 제출 서면 (2026. 6. 15.)</h2><p>오늘 제출하는 3개 서면의 내용과 보완 포인트</p></div>
+
+  <div class="card open">
+    <div class="ch" onclick="tog(this)">
+      <div class="ci" style="background:#e8f0ff">📘</div>
+      <div class="ct">
+        <div class="cd">2026. 6. 9. 작성 · 6. 15. 제출</div>
+        <div class="ctitle">피고 준비서면 (2차)</div>
+        <div class="csub">하온·셀온 부가세 자료 제출 + 셀온 무관성 + 손실 구체적 수치</div>
+      </div>
+      <div class="cr"><span class="tag td">피고</span><div class="exp">▾</div></div>
+    </div>
+    <div class="cb">
+      <div class="dg">
+        <div class="db ok"><h4>✅ 잘 된 부분</h4><ul><li>을 제30~33호증 제출로 자료 협조 의무 이행</li><li>셀온 무관성 명확히 기재</li><li>하온 적자 사실 기재</li><li>피고 손실 자발적 변제 사실 기재</li></ul></div>
+        <div class="db warn"><h4>⚠️ 보완 필요 사항</h4><ul><li>셀온 자료 미제출 — 법적 근거(민사소송법 §344) 명시 필요</li><li>"매출 ≠ 이익" 논리 추가 필요 (셀온 86억 원 대응)</li><li>2025. 7. 100만 원, 8. 200만 원 납입 경위 설명 추가 필요</li></ul></div>
+        <div class="db full"><h4>핵심 증거 제출 현황</h4><ul><li><strong>을 제30호증</strong>: 네이버 스마트스토어 판매내역 원본</li><li><strong>을 제31-1호증</strong>: 셀온 부가세과세표준증명원 (총 ~86억 원)</li><li><strong>을 제31-2호증</strong>: 하온 부가세과세표준증명원 (초기 환급 = 손실)</li><li><strong>을 제32호증</strong>: 하나은행 입금내역 (2025. 2.~ 매월 150만 원 변제)</li><li><strong>을 제33호증</strong>: 최석림 사실확인서 (공증, 손실 7,600만 원 확인)</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card open">
+    <div class="ch" onclick="tog(this)">
+      <div class="ci" style="background:#e8fff2">📗</div>
+      <div class="ct">
+        <div class="cd">2026. 6. 15. 제출</div>
+        <div class="ctitle">과세정보제출명령신청 — 안민현 개인사업자</div>
+        <div class="csub">개인사업자 633-32-00761 / 관할 세무서</div>
+      </div>
+      <div class="cr"><span class="tag td">피고 신청</span><div class="exp">▾</div></div>
+    </div>
+    <div class="cb">
+      <div class="dg">
+        <div class="db ok"><h4>목적</h4><p>원고가 개인사업자 명의로 타무르데이츠를 판매한 규모를 세금 자료로 직접 확인. 추정 매출 약 20억 원을 입증 가능한 수치로 전환.</p></div>
+        <div class="db"><h4>요청 자료</h4><ul><li>2022. 1. 1. ~ 2025. 12. 31. 부가가치세 신고 내역</li><li>매출·매입처별 세금계산서합계표</li><li>기타 부속서류</li></ul></div>
+        <div class="db warn full"><h4>법적 의미</h4><p>원고의 경업금지의무 위반 사실 입증 + 법인 매출이 개인으로 우회된 정황 확인 → 피고의 손해배상 책임 부존재 및 위약벌 공서양속 위반 판단의 핵심 자료</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card open">
+    <div class="ch" onclick="tog(this)">
+      <div class="ci" style="background:#f3e8ff">📙</div>
+      <div class="ct">
+        <div class="cd">2026. 6. 15. 제출</div>
+        <div class="ctitle">과세정보제출명령신청 — 주식회사 타무르</div>
+        <div class="csub">법인 153-87-01605 / 전주세무서</div>
+      </div>
+      <div class="cr"><span class="tag td">피고 신청</span><div class="exp">▾</div></div>
+    </div>
+    <div class="cb">
+      <div class="dg">
+        <div class="db ok"><h4>목적</h4><p>법인의 매출·매입처별 세금계산서 합계표를 확인하여, 법인 채널에서 매출이 원고 개인 채널로 우회된 정황을 입증.</p></div>
+        <div class="db"><h4>요청 자료</h4><ul><li>2022. 1. 1. ~ 2025. 12. 31. 부가가치세 신고 내역</li><li>매출·매입처별 세금계산서합계표</li></ul></div>
+        <div class="db danger full"><h4>기대 효과</h4><p>법인 매출 급감 시점과 원고 개인사업자 매출 급증 시점이 일치한다면, 원고가 법인 매출을 의도적으로 개인으로 우회했다는 결정적 증거가 됩니다.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 타임라인 ════ -->
+<div id="p-timeline" class="panel">
+  <div class="ph"><h2>📅 전체 타임라인</h2><p>2021년부터 현재까지 주요 사건 일지</p></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#8890b0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e8eaf0">동업 파탄 경위</div>
+      <div style="position:relative;padding-left:18px">
+        <div style="position:absolute;left:5px;top:0;bottom:0;width:1.5px;background:#e8eaf0"></div>
+        <div id="tl-events"></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#8890b0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e8eaf0">소송 진행</div>
+      <div style="position:relative;padding-left:18px">
+        <div style="position:absolute;left:5px;top:0;bottom:0;width:1.5px;background:#e8eaf0"></div>
+        <div id="tl-suits"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 증거 목록 ════ -->
+<div id="p-evidence" class="panel">
+  <div class="ph"><h2>📎 주요 증거 목록</h2><p>갑호증(원고) · 을호증(피고)</p></div>
+  <div class="card">
+    <div style="overflow-x:auto">
+      <table class="etbl">
+        <thead><tr><th>번호</th><th>당사자</th><th>내용</th><th>의미 / 주의</th></tr></thead>
+        <tbody>
+          <tr><td><span class="en">갑 제3호증</span></td><td><span class="ep ep-p">원고</span></td><td>주주간 계약서</td><td>경업금지·위약벌 조항 근거</td></tr>
+          <tr><td><span class="en">갑 제12호증</span></td><td><span class="ep ep-p">원고</span></td><td>셀온 "유일한 정품" 허위공지</td><td>⚠️ 피고에 불리 — 해명 필요</td></tr>
+          <tr><td><span class="en">갑 제17호증</span></td><td><span class="ep ep-p">원고</span></td><td>장성휴 사실확인서</td><td>⚠️ 피고 자진퇴사 주장 근거 / 이해관계자 탄핵 필요</td></tr>
+          <tr><td><span class="en">갑 제24호증</span></td><td><span class="ep ep-p">원고</span></td><td>윤형석 근태일지 (2020. 5.)</td><td>⚠️ 피고 무단결근 주장 근거</td></tr>
+          <tr><td><span class="en">갑 제46호증</span></td><td><span class="ep ep-p">원고</span></td><td>타무르 상표등록공보 (2025. 1. 10.)</td><td>상표 등록 사실 증명</td></tr>
+          <tr><td><span class="en">을 제22~24호증</span></td><td><span class="ep ep-d">피고</span></td><td>원고 개인사업자 판매 현황</td><td>원고 선행 경업위반 / 추정매출 ~20억 원</td></tr>
+          <tr><td><span class="en">을 제25호증</span></td><td><span class="ep ep-d">피고</span></td><td>카카오톡 포렌식</td><td>원고가 먼저 동업 종료 통보한 증거</td></tr>
+          <tr><td><span class="en">을 제26호증</span></td><td><span class="ep ep-d">피고</span></td><td>원고 일방적 퇴사 처리</td><td>정산 없이 퇴사 처리 증거</td></tr>
+          <tr><td><span class="en">을 제27호증</span></td><td><span class="ep ep-d">피고</span></td><td>하온 법인등기부등본</td><td>하온 설립일·대표이사 사임일 확인</td></tr>
+          <tr><td><span class="en">을 제30호증</span></td><td><span class="ep ep-d">피고</span></td><td>네이버 스마트스토어 판매내역</td><td>하온 매출 증빙</td></tr>
+          <tr><td><span class="en">을 제31-1호증</span></td><td><span class="ep ep-d">피고</span></td><td>셀온 부가세과세표준증명원</td><td>셀온 전체 매출 (~86억 원, 다품목 포함)</td></tr>
+          <tr><td><span class="en">을 제31-2호증</span></td><td><span class="ep ep-d">피고</span></td><td>하온 부가세과세표준증명원</td><td>초기 환급(손실) — 적자 증거</td></tr>
+          <tr><td><span class="en">을 제32호증</span></td><td><span class="ep ep-d">피고</span></td><td>하나은행 입금내역</td><td>피고 손실 분담금 변제 내역 (2025. 2.~)</td></tr>
+          <tr><td><span class="en">을 제33호증</span></td><td><span class="ep ep-d">피고</span></td><td>최석림 사실확인서 (공증)</td><td>하온 총손실 7,600만 원 / 피고 부담 2,535만 원</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /layout -->
+
+<script>
+// 패널 전환
+function go(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.mi').forEach(m=>m.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  const el=document.querySelector(`[onclick="go('${id}')"]`);
+  if(el) el.classList.add('on');
+  document.querySelector('.content').scrollTop=0;
+}
+
+// 카드 토글
+function tog(ch){
+  const card=ch.closest('.card');
+  card.classList.toggle('open');
+}
+
+// 서면 토글
+function togDoc(h){
+  const item=h.closest('.doc-item');
+  item.classList.toggle('open');
+}
+
+// 서면 내 탭 전환
+function docTab(btn,targetId){
+  const body=btn.closest('.doc-body');
+  body.querySelectorAll('.doc-tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  const content=body.querySelector('.doc-content');
+  content.querySelectorAll(':scope > div').forEach(d=>d.style.display='none');
+  document.getElementById(targetId).style.display='block';
+}
+
+// 타임라인 렌더
+const events=[
+  {d:'2021. 3. 7.',t:'주주간 계약 체결 (3인)',c:'#7209b7'},
+  {d:'2022. 1. 29.',t:'원고, 먼저 동업 종료 통보',c:'#00a854'},
+  {d:'2022. 2. 3.',t:'⚠️ 피고 재직 중 상표 단독 출원',c:'#f72585'},
+  {d:'2022. 3. 8.',t:'원고, 일방적 퇴사 처리',c:'#00a854'},
+  {d:'2022. 3. 10.경',t:'⚠️ 원고 개인사업자 동종영업 개시',c:'#f72585'},
+  {d:'2022. 3. 14.',t:'피고, 하온 설립',c:'#4361ee'},
+  {d:'2022. 5.',t:'피고, 하온 대표이사 사임',c:'#4361ee'},
+  {d:'2023년',t:'피고, 해외취업으로 완전 이탈',c:'#4361ee'},
+  {d:'2025. 2.~',t:'피고, 손실 분담금 변제 시작 (월 150만 원)',c:'#4361ee'},
+];
+const suits=[
+  {d:'2023년',t:'원고 1심 소 제기',c:'#00a854'},
+  {d:'2025. 9.',t:'1심 판결 — 6,000만 원',c:'#7209b7'},
+  {d:'2025년',t:'별소 — 장부열람 가처분 신청',c:'#b07c00'},
+  {d:'2025. 10.',t:'원고 항소장',c:'#00a854'},
+  {d:'2025. 12. 29.',t:'피고 항소이유서',c:'#4361ee'},
+  {d:'2026. 3. 10.',t:'원고 부대항소이유서',c:'#00a854'},
+  {d:'2026. 5. 12.',t:'피고 준비서면',c:'#4361ee'},
+  {d:'2026. 5. 14.',t:'제1회 변론기일',c:'#7209b7'},
+  {d:'2026. 6. 15. ★',t:'오늘 — 준비서면 + 과세정보신청',c:'#4361ee',now:true},
+];
+function renderTL(items,elId){
+  const el=document.getElementById(elId);
+  el.innerHTML=items.map(i=>`
+    <div style="position:relative;padding:7px 0 7px 12px;margin-bottom:2px">
+      <div style="position:absolute;left:-13px;top:13px;width:8px;height:8px;border-radius:50%;background:${i.c};border:2px solid #fff;${i.now?'box-shadow:0 0 0 3px rgba(67,97,238,.3)':''}"></div>
+      <div style="font-size:10px;font-weight:700;color:${i.now?'#4361ee':'#aab0c8'}">${i.d}</div>
+      <div style="font-size:12.5px;font-weight:${i.now?'700':'500'};color:${i.now?'#4361ee':'#1a1d2e'};margin-top:1px;line-height:1.4">${i.t}</div>
+    </div>`).join('');
+}
+renderTL(events,'tl-events');
+renderTL(suits,'tl-suits');
+</script>
+</body>
+</html>
